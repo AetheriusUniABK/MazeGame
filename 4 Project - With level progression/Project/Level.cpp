@@ -9,6 +9,7 @@
 #include "Door.h"
 #include "Goal.h"
 #include "Money.h"
+#include "Potion.h"
 
 using namespace std;
 
@@ -174,6 +175,11 @@ bool Level::ConvertLevel(int* playerX, int* playerY)
 			case 'h':
 				m_pActors.push_back(new Enemy(x, y, 3, 0));
 				m_pLevelData[index] = ' '; // clear the level
+				break;
+			// CUSTOM ACTOR
+			case 'P':
+				m_pLevelData[index] = ' ';
+				m_pActors.push_back(new Potion(x, y, ActorColor::Yellow));
 				break;
 			case 'v':
 				m_pLevelData[index] = ' ';

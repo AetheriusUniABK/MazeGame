@@ -13,6 +13,7 @@
 #include "AudioManager.h"
 #include "Utility.h"
 #include "StateMachineExampleGame.h"
+#include "Potion.h"
 
 using namespace std;
 
@@ -30,6 +31,8 @@ GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	, m_currentLevel(0)
 	, m_pLevel(nullptr)
 {
+	// CUSTOM ACTOR IN THIS LEVEL
+	m_LevelNames.push_back("LevelCustom.txt");
 	m_LevelNames.push_back("Level1.txt");
 	m_LevelNames.push_back("Level2.txt");
 	m_LevelNames.push_back("Level3.txt");
@@ -212,6 +215,20 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 			{
 				m_player.SetPosition(newPlayerX, newPlayerY);
 			}
+			break;
+		}
+		// CUSTOM ACTOR
+		case ActorType::Potion:
+		{
+			Potion* collidedPotion = dynamic_cast<Potion*>(collidedActor);
+			assert(collidedPotion);
+			//if (m_player.GetLives()<3)
+			//{
+				m_player.IncrementLives();
+				collidedPotion->Remove();
+				m_player.SetPosition(newPlayerX, newPlayerY);
+				AudioManager::GetInstance()->PlayKeyPickupSound();
+			//}
 			break;
 		}
 		case ActorType::Goal:

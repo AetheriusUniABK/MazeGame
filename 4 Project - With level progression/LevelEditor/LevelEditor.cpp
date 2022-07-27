@@ -149,6 +149,8 @@ void DisplayLegend()
 	cout << "v for vertical moving enemy" << endl;
 	cout << "h for horizontal moving enemy" << endl;
 	cout << "e for non-moving enemy" << endl;
+	// CUSTOM ACTOR
+	cout << "P for potion" << endl;
 	cout << "X for end" << endl;
 }
 
