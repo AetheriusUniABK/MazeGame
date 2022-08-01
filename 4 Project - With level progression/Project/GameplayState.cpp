@@ -220,6 +220,7 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 		// CUSTOM ACTOR
 		case ActorType::Potion:
 		{
+			// breakpoint placed here to make sure my Potion is properly picked up and increases m_player lives by 1
 			Potion* collidedPotion = dynamic_cast<Potion*>(collidedActor);
 			assert(collidedPotion);
 			//if (m_player.GetLives()<3)
