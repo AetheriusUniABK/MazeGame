@@ -12,6 +12,10 @@ public:
 	~MainMenuState() = default;
 
 	virtual bool Update(bool processInput = true) override;
+	void ProcessInput() override;
 	virtual void Draw() override;
+
+private:
+	bool m_shouldQuit = false;
 };
 
