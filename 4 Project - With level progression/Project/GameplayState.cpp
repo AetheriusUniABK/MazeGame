@@ -5,6 +5,9 @@
 #include <windows.h>
 #include <assert.h>
 
+// need threads
+#include <thread>
+
 #include "Enemy.h"
 #include "Key.h"
 #include "Door.h"
@@ -23,6 +26,9 @@ constexpr int kRightArrow = 77;
 constexpr int kUpArrow = 72;
 constexpr int kDownArrow = 80;
 constexpr int kEscapeKey = 27;
+
+// bool for if user made an input or not
+//bool inputDetected;
 
 GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	: m_pOwner(pOwner)
@@ -61,12 +67,20 @@ bool GameplayState::Load()
 void GameplayState::Enter()
 {
 	Load();
+	// put thread here
+	//m_pInputThread = new thread(&GameplayState::ProcessInput, this);
+	//thread m_pInputThread(ProcessInput);
+	//m_pInputThread.join();
 }
 
 // Refactored: put code required to process input in it's own function
 void GameplayState::ProcessInput()
 {
 	int input = _getch();
+	//int input;
+	//cin >> input;
+	m_inputReceived = true;
+
 	int arrowInput = 0;
 	int newPlayerX = m_player.GetXPosition();
 	int newPlayerY = m_player.GetYPosition();
@@ -113,8 +127,12 @@ void GameplayState::ProcessInput()
 	}
 	else
 	{
-		HandleCollision(newPlayerX, newPlayerY);
+		//HandleCollision(newPlayerX, newPlayerY);
+		
 	}
+	// thanks Greg
+	HandleCollision(newPlayerX, newPlayerY);
+	m_inputReceived = false;
 }
 
 // Refactored: put code for checking if level is beaten in its own function
@@ -148,9 +166,14 @@ void GameplayState::CheckBeatLevel()
 // TODO: refactor
 bool GameplayState::Update(bool processInput)
 {
-	if (processInput && !m_DidBeatLevel)
+	//if (processInput && !m_DidBeatLevel)
+	if (processInput && !m_DidBeatLevel && m_inputReceived)
 	{
+		//inputDetected = false;
+		//thread Move(&GameplayState::UpdateWorld, this);
 		ProcessInput();
+		//inputDetected = true;
+		//Move.join();
 	}
 
 	CheckBeatLevel();
@@ -292,6 +315,17 @@ void GameplayState::Draw()
 
 	DrawHUD(console);
 }
+
+/*
+void GameplayState::UpdateWorld()
+{
+	while (!inputDetected)
+	{
+		m_pLevel->UpdateActorsThread();
+		this_thread::sleep_for(chrono::milliseconds(500));
+		Draw();
+	}
+}*/
 
 void GameplayState::DrawHUD(const HANDLE& console)
 {

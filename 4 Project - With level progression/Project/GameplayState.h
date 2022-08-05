@@ -32,6 +32,9 @@ public:
 	virtual bool Update(bool processInput = true) override;
 	virtual void Draw() override;
 
+	// allows world to update independent of the player
+	//virtual void UpdateWorld();
+
 protected:
 	void ProcessInput() override;
 	void CheckBeatLevel();
@@ -40,4 +43,9 @@ private:
 	void HandleCollision(int newPlayerX, int newPlayerY);
 	bool Load();
 	void DrawHUD(const HANDLE& console);
+
+	// thanks Greg
+	//int m_input;
+	bool m_inputReceived = false;
+	thread* m_pInputThread;
 };
