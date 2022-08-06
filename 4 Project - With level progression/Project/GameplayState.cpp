@@ -30,8 +30,6 @@ constexpr int kUpArrow = 72;
 constexpr int kDownArrow = 80;
 constexpr int kEscapeKey = 27;
 
-// bool for if user made an input or not
-//bool inputDetected;
 
 GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	: m_pOwner(pOwner)
@@ -76,15 +74,6 @@ bool GameplayState::Load()
 void GameplayState::Enter()
 {
 	Load();
-	// put thread here
-	//m_pInputThread = new thread(&GameplayState::ProcessInput, this);
-	//thread m_pInputThread(ProcessInput);
-	//m_pInputThread.join();
-	//thread m_pInputThread = new thread(&GameplayState::ProcessInput, this);
-	//thread m_pInputThread(&GameplayState::ProcessInput, this);
-	//inputDetected = true;
-	//Move.join();
-	//m_pInputThread.join();
 	m_pInputProcessor->Run();
 }
 
@@ -95,41 +84,28 @@ void GameplayState::ProcessInput()
 		int newPlayerY = m_player.GetYPosition();
 
 		switch (m_pInputProcessor->GetInput()) {
-		case InputEvent::MoveUp:
-			newPlayerY--;
-			break;
-		case InputEvent::MoveDown:
-			newPlayerY++;
-			break;
-		case InputEvent::MoveLeft:
-			newPlayerX--;
-			break;
-		case InputEvent::MoveRight:
-			newPlayerX++;
-			break;
-		case InputEvent::DropKey:
-			m_player.DropKey();
-			break;
-		case InputEvent::ExitGame:
-			m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
-			break;
+			case InputEvent::MoveUp:
+				newPlayerY--;
+				break;
+			case InputEvent::MoveDown:
+				newPlayerY++;
+				break;
+			case InputEvent::MoveLeft:
+				newPlayerX--;
+				break;
+			case InputEvent::MoveRight:
+				newPlayerX++;
+				break;
+			case InputEvent::DropKey:
+				m_player.DropKey();
+				break;
+			case InputEvent::ExitGame:
+				m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
+				break;
 		}
 
 		m_player.Update();
 		HandleCollision(newPlayerX, newPlayerY);
-		/*
-		if (m_player.GetLives() < 0)
-		{
-			//TODO: Go to game over screen
-			AudioManager::GetInstance()->PlayLoseSound();
-			m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
-		}
-		else if (m_pPlayer->HasReachedExit()) {
-			m_beatLevel = true;
-			m_pPlayer->ResetLevelExitState();
-		}
-		*/
-		
 }
 
 
@@ -164,31 +140,23 @@ void GameplayState::CheckBeatLevel()
 // TODO: refactor
 bool GameplayState::Update(bool processInput)
 {
-	//int newPlayerX = m_player.GetXPosition();
-	//int newPlayerY = m_player.GetYPosition();
-	
+
+	if (processInput && !m_DidBeatLevel && m_player.getIsAlive())
+	//if (processInput && !m_DidBeatLevel && m_inputReceived)
+	{
+		ProcessInput();
+	}
+
+	CheckBeatLevel();
+
 	if (m_player.GetLives() < 0)
 	{
 		//TODO: Go to game over screen
 		AudioManager::GetInstance()->PlayLoseSound();
 		m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
+		m_player.setIsAlive(false);
+		//m_pOwner->ChangeState(m_pOwner->GetNextState());
 	}
-
-	if (processInput && !m_DidBeatLevel)
-	//if (processInput && !m_DidBeatLevel && m_inputReceived)
-	{
-		
-		//inputDetected = false;
-		//thread Move(&GameplayState::UpdateWorld, this);
-		ProcessInput();
-		//thread m_pInputThread(&GameplayState::ProcessInput, this);
-		//inputDetected = true;
-		//Move.join();
-		//m_pInputThread.join();
-		
-	}
-
-	CheckBeatLevel();
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -213,12 +181,6 @@ void GameplayState::HandleCollision(int newPlayerX, int newPlayerY)
 			m_player.SetPosition(newPlayerX, newPlayerY);
 
 			m_player.DecrementLives();
-			if (m_player.GetLives() < 0)
-			{
-				//TODO: Go to game over screen
-				AudioManager::GetInstance()->PlayLoseSound();
-				m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
-			}
 			break;
 		}
 		case ActorType::Money:
@@ -329,17 +291,6 @@ void GameplayState::Draw()
 
 	DrawHUD(console);
 }
-
-/*
-void GameplayState::UpdateWorld()
-{
-	while (!inputDetected)
-	{
-		m_pLevel->UpdateActorsThread();
-		this_thread::sleep_for(chrono::milliseconds(500));
-		Draw();
-	}
-}*/
 
 void GameplayState::DrawHUD(const HANDLE& console)
 {

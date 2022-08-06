@@ -79,7 +79,9 @@ void StateMachineExampleGame::LoadScene(SceneName scene)
 		m_pNextState = new WinState(this);
 		break;
 	case SceneName::Lose:
-		m_pNextState = new LoseState(this);
+		//m_pNextState = new LoseState(this);
+		// heheh, allows lose state to work like it did non-multithreaded
+		m_pCurrentState = new LoseState(this);
 		break;
 	}
 

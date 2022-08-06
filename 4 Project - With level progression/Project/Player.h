@@ -26,8 +26,14 @@ public:
 
 	virtual ActorType GetType() override { return ActorType::Player; }
 	virtual void Draw() override;
+
+	bool getIsAlive();
+	void setIsAlive(bool aliveStatus);
+
 private:
 	Key* m_pCurrentKey;
 	int m_money;
 	int m_lives;
+
+	bool isAlive = true;
 };

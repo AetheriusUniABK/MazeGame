@@ -46,10 +46,4 @@ private:
 	void HandleCollision(int newPlayerX, int newPlayerY);
 	bool Load();
 	void DrawHUD(const HANDLE& console);
-
-	// thanks Greg
-	//int m_input;
-	//bool m_inputReceived = false;
-	//thread m_pInputThread;
-	//int input;
 };
