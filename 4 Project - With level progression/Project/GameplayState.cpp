@@ -18,6 +18,9 @@
 #include "StateMachineExampleGame.h"
 #include "Potion.h"
 
+// for multithreading
+#include "InputProcessor.h"
+
 using namespace std;
 
 constexpr int kArrowInput = 224;
@@ -36,6 +39,8 @@ GameplayState::GameplayState(StateMachineExampleGame* pOwner)
 	, m_skipFrameCount(0)
 	, m_currentLevel(0)
 	, m_pLevel(nullptr)
+	// for multithreading
+	, m_pInputProcessor(new InputProcessor())
 {
 	// CUSTOM ACTOR IN THIS LEVEL
 	m_LevelNames.push_back("LevelCustom.txt");
@@ -48,6 +53,10 @@ GameplayState::~GameplayState()
 {
 	delete m_pLevel;
 	m_pLevel = nullptr;
+
+	m_pInputProcessor->Stop();
+	delete m_pInputProcessor;
+	m_pInputProcessor = nullptr;
 }
 
 bool GameplayState::Load()
@@ -71,69 +80,58 @@ void GameplayState::Enter()
 	//m_pInputThread = new thread(&GameplayState::ProcessInput, this);
 	//thread m_pInputThread(ProcessInput);
 	//m_pInputThread.join();
+	//thread m_pInputThread = new thread(&GameplayState::ProcessInput, this);
+	//thread m_pInputThread(&GameplayState::ProcessInput, this);
+	//inputDetected = true;
+	//Move.join();
+	//m_pInputThread.join();
+	m_pInputProcessor->Run();
 }
 
 // Refactored: put code required to process input in it's own function
 void GameplayState::ProcessInput()
 {
-	int input = _getch();
-	//int input;
-	//cin >> input;
-	m_inputReceived = true;
+		int newPlayerX = m_player.GetXPosition();
+		int newPlayerY = m_player.GetYPosition();
 
-	int arrowInput = 0;
-	int newPlayerX = m_player.GetXPosition();
-	int newPlayerY = m_player.GetYPosition();
+		switch (m_pInputProcessor->GetInput()) {
+		case InputEvent::MoveUp:
+			newPlayerY--;
+			break;
+		case InputEvent::MoveDown:
+			newPlayerY++;
+			break;
+		case InputEvent::MoveLeft:
+			newPlayerX--;
+			break;
+		case InputEvent::MoveRight:
+			newPlayerX++;
+			break;
+		case InputEvent::DropKey:
+			m_player.DropKey();
+			break;
+		case InputEvent::ExitGame:
+			m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
+			break;
+		}
 
-	// One of the arrow keys were pressed
-	if (input == kArrowInput)
-	{
-		arrowInput = _getch();
-	}
-
-	if ((input == kArrowInput && arrowInput == kLeftArrow) ||
-		(char)input == 'A' || (char)input == 'a')
-	{
-		newPlayerX--;
-	}
-	else if ((input == kArrowInput && arrowInput == kRightArrow) ||
-		(char)input == 'D' || (char)input == 'd')
-	{
-		newPlayerX++;
-	}
-	else if ((input == kArrowInput && arrowInput == kUpArrow) ||
-		(char)input == 'W' || (char)input == 'w')
-	{
-		newPlayerY--;
-	}
-	else if ((input == kArrowInput && arrowInput == kDownArrow) ||
-		(char)input == 'S' || (char)input == 's')
-	{
-		newPlayerY++;
-	}
-	else if (input == kEscapeKey)
-	{
-		m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
-	}
-	else if ((char)input == 'Z' || (char)input == 'z')
-	{
-		m_player.DropKey();
-	}
-
-	// If position never changed
-	if (newPlayerX == m_player.GetXPosition() && newPlayerY == m_player.GetYPosition())
-	{
-		//return false;
-	}
-	else
-	{
-		//HandleCollision(newPlayerX, newPlayerY);
+		m_player.Update();
+		HandleCollision(newPlayerX, newPlayerY);
+		/*
+		if (m_player.GetLives() < 0)
+		{
+			//TODO: Go to game over screen
+			AudioManager::GetInstance()->PlayLoseSound();
+			m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
+		}
+		else if (m_pPlayer->HasReachedExit()) {
+			m_beatLevel = true;
+			m_pPlayer->ResetLevelExitState();
+		}
+		*/
 		
-	}
-	// thanks Greg
-	HandleCollision(newPlayerX, newPlayerY);
-	m_inputReceived = false;
 }
+
 
 // Refactored: put code for checking if level is beaten in its own function
 void GameplayState::CheckBeatLevel()
@@ -166,17 +164,33 @@ void GameplayState::CheckBeatLevel()
 // TODO: refactor
 bool GameplayState::Update(bool processInput)
 {
-	//if (processInput && !m_DidBeatLevel)
-	if (processInput && !m_DidBeatLevel && m_inputReceived)
+	//int newPlayerX = m_player.GetXPosition();
+	//int newPlayerY = m_player.GetYPosition();
+	
+	if (m_player.GetLives() < 0)
 	{
+		//TODO: Go to game over screen
+		AudioManager::GetInstance()->PlayLoseSound();
+		m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
+	}
+
+	if (processInput && !m_DidBeatLevel)
+	//if (processInput && !m_DidBeatLevel && m_inputReceived)
+	{
+		
 		//inputDetected = false;
 		//thread Move(&GameplayState::UpdateWorld, this);
 		ProcessInput();
+		//thread m_pInputThread(&GameplayState::ProcessInput, this);
 		//inputDetected = true;
 		//Move.join();
+		//m_pInputThread.join();
+		
 	}
 
 	CheckBeatLevel();
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 	return false;
 }

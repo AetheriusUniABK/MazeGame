@@ -8,10 +8,13 @@
 #include <string>
 
 class StateMachineExampleGame;
+class InputProcessor;
 
 class GameplayState : public GameState
 {
 	StateMachineExampleGame* m_pOwner;
+	// for multithreading
+	InputProcessor* m_pInputProcessor;
 	
 	Player m_player;
 	Level* m_pLevel;
@@ -46,6 +49,7 @@ private:
 
 	// thanks Greg
 	//int m_input;
-	bool m_inputReceived = false;
-	thread* m_pInputThread;
+	//bool m_inputReceived = false;
+	//thread m_pInputThread;
+	//int input;
 };

@@ -72,6 +72,9 @@
     <ClCompile Include="Potion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InputProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -138,6 +141,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Potion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
